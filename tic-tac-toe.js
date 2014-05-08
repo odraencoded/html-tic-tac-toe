@@ -4,8 +4,8 @@ board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
 squares = [[],[],[]];
 turn = 0;
 playing = false;
-stats = { victories: 0, ties: 0, defeats: 0 }
-statsEls = {
+score = { victories: 0, ties: 0, defeats: 0 }
+scoreEls = {
 	victories: document.getElementById("wins"),
 	ties: document.getElementById("draws"),
 	defeats: document.getElementById("losses")
@@ -31,6 +31,10 @@ boardEl.removeAttribute("hidden");
 
 turnEl = document.getElementById("turn-stat");
 statusEl = document.getElementById("status");
+
+document.getElementById("new-game").addEventListener("click", startNewGame);
+
+loadGame();
 
 function refreshTurnStat() {
 	if(turn < 8) {
@@ -66,8 +70,95 @@ function startNewGame() {
 	}
 	statusEl.textContent = "Your Turn";
 	refreshTurnStat();
+	
+	setCookie("board", JSON.stringify(board), 60);
 }
-document.getElementById("new-game").addEventListener("click", startNewGame);
+
+
+function loadGame() {
+	turn = 0;
+	var savedScore = getCookie("score")
+	if(savedScore != "") {
+		score = JSON.parse(savedScore);
+		for(var key in score) {
+			scoreEls[key].textContent = score[key];
+		}
+	}
+	var savedBoard = getCookie("board");
+	if(savedBoard != "") {
+		board = JSON.parse(savedBoard);
+		for(var l=0; l<3; l++) {
+			for(var c=0; c<3; c++) {
+				var mark = board[l][c];
+				var square = squares[l][c];
+				square.className = "square";
+				if(mark != 0) {
+					turn++;
+					if(mark == 1) {
+						square.className += " marked cross";
+					} else if(mark == 2){
+						square.className += " marked circle";
+					}
+				}
+			}
+		}
+		
+		var highlight = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+		var matchResult = 0;
+		var tests = []
+		for(var l=0; l<3; l++) {
+			tests.push([[l, 0], [[l, 0], [l, 1], [l, 2]]]);
+		}
+		for(var c=0; c<3; c++) {
+			tests.push([[0, c], [[0, c], [1, c], [2, c]]]);
+		}
+		tests.push([[1, 1], [[0, 0], [1, 1], [2, 2]]]);
+		tests.push([[1, 1], [[0, 2], [1, 1], [2, 0]]]);
+		
+		for(var i=0; i<tests.length; i++) {
+			var l = tests[i][0][0];
+			var c = tests[i][0][1];
+			var test = tests[i][1];
+			var mark = board[l][c];
+			if(mark != 0) {
+				if(checkLineVictory(mark, test, highlight)) {
+					matchResult = mark;
+				}
+			}
+		}
+		playing = !(matchResult != 0 | turn >= 8);
+		
+		if(matchResult == 0) {
+			if(turn >= 8) {
+				statusEl.textContent = "Draw";
+			} else {
+				statusEl.textContent = "Your Turn";
+			}
+		}
+		else {
+			if(matchResult == 1) {
+				statusEl.textContent = "Your Win";
+			}
+			else if(matchResult == 2) {
+				statusEl.textContent = "You Lose";
+			}
+			
+			turn--;
+		}
+		
+		highlightSquares(highlight)
+		
+		if(playing) {
+			boardEl.className = "playing";
+		} else {
+			boardEl.className = "finished";
+		}
+		
+		refreshTurnStat();
+	} else {
+		startNewGame();
+	}
+}
 
 function clickedSquare(l, c) {
 	if(playing && board[l][c] == 0) {
@@ -94,6 +185,16 @@ function checkLineVictory(mark, positions, highlight) {
 	return line;
 }
 
+function highlightSquares(highlight) {
+	for(var l=0; l<3; l++) {
+		for(var c=0; c<3; c++) {
+			if(highlight[l][c]) {
+				squares[l][c].className += " highlighted";
+			}
+		}
+	}
+}
+
 function endTurn(l, c) {
 	var mark = board[l][c];
 	var victory = false;
@@ -109,20 +210,15 @@ function endTurn(l, c) {
 	}
 	
 	if(victory) {
-		for(var l=0; l<3; l++) {
-			for(var c=0; c<3; c++) {
-				if(highlight[l][c]) {
-					squares[l][c].className += " highlighted";
-				}
-			}
-		}
+		highlightSquares(highlight);
+		
 		if(playerTurn) {
 			statusEl.textContent = "You Win";
-			stats.victories += 1;
+			score.victories += 1;
 			endGame();
 		} else {
 			statusEl.textContent = "You Lose";
-			stats.defeats += 1;
+			score.defeats += 1;
 			endGame();
 		}
 	} else if(turn < 8) {
@@ -132,23 +228,27 @@ function endTurn(l, c) {
 		playerTurn = !playerTurn;
 		if(!playerTurn) {
 			machineTurn();
+			return // machineTurn calls this method anyway
 		}
 	} else {
 		statusEl.textContent = "Draw";
-		stats.ties += 1;
+		score.ties += 1;
 		endGame();
 	}
 	
 	if(!playing) {
 		boardEl.className = "finished";
 	}
+	
+	setCookie("board", JSON.stringify(board), 60);
 }
 
 function endGame() {
 	playing = false;
-	for(var key in stats) {
-		statsEls[key].textContent = stats[key];
+	for(var key in score) {
+		scoreEls[key].textContent = score[key];
 	}
+	setCookie("score", JSON.stringify(score), 60);
 }
 
 function getLineStats(positions) {
@@ -222,4 +322,29 @@ function addMark(l, c, v) {
 	}
 }
 
-startNewGame();
+function setCookie(name, value, days) {
+    var expires;
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+    } else {
+        expires = "";
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function getCookie(c_name) {
+    if (document.cookie.length > 0) {
+        c_start = document.cookie.indexOf(c_name + "=");
+        if (c_start != -1) {
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf(";", c_start);
+            if (c_end == -1) {
+                c_end = document.cookie.length;
+            }
+            return unescape(document.cookie.substring(c_start, c_end));
+        }
+    }
+    return "";
+}
