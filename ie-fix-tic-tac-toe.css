@@ -1,0 +1,15 @@
+.square-cell {
+	position: static;
+	
+	text-align: center;
+	vertical-align: middle;
+	line-height: 0em;
+}
+
+.square {
+	position: static;
+	display: inline-block;
+	
+	width: 104px;
+	height: 104px;
+}

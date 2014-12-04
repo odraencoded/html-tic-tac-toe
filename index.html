@@ -1,11 +1,20 @@
 <!doctype html>
 <html lang=en>
 <meta charset=utf-8>
+
 <title>Tic Tac Toe</title>
+<meta description="A simple tic-tac-toe game made with Javascript. The machine makes decisions randomly. The source code is fully commented.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel=icon href="favicon.png">
+
 <link rel=stylesheet href="tic-tac-toe.css">
+<!--[if IE]><link rel=stylesheet href="ie-fix-tic-tac-toe.css"><![endif]-->
+<link rel=stylesheet media="(max-width: 320px)" href="narrow-tic-tac-toe.css">
+<link rel=stylesheet media="(max-width: 260px)" href="super-narrow-tic-tac-toe.css">
 
 <div class="centralized">
-	<div id=top-bar>	
+	<div id=top-bar>
 		<div id=stats>
 			<div>Wins: <span id=wins>0</span></div>
 			<div>Draws: <span id=draws>0</span></div>
@@ -14,33 +23,42 @@
 		<div id=status></div>
 	</div>
 </div>
-<div id=board-container>
+
+<div id=middle>
 	<div class="centralized">
-		<div id=board hidden>
-			<div class="square-row">
-				<div><div id=square-1-1></div></div>
-				<div><div id=square-1-2></div></div>
-				<div><div id=square-1-3></div></div>
-			</div>
-			<div class="square-row">
-				<div><div id=square-2-1></div></div>
-				<div><div id=square-2-2></div></div>
-				<div><div id=square-2-3></div></div>
-			</div>
-			<div class="square-row">
-				<div><div id=square-3-1></div></div>
-				<div><div id=square-3-2></div></div>
-				<div><div id=square-3-3></div></div>
+		<div id=board-container>
+			<div id=board hidden>
+				<div>
+					<div><div id=square-1-1></div></div>
+					<div><div id=square-1-2></div></div>
+					<div><div id=square-1-3></div></div>
+				</div>
+				<div>
+					<div><div id=square-2-1></div></div>
+					<div><div id=square-2-2></div></div>
+					<div><div id=square-2-3></div></div>
+				</div>
+				<div>
+					<div><div id=square-3-1></div></div>
+					<div><div id=square-3-2></div></div>
+					<div><div id=square-3-3></div></div>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
+
 <div id=bottom>
 	<div class="centralized">
 		<div id=bottom-bar>
 			<input type=button id=new-game href="#new-game" value="New Game">
 			<div id=turn-stat>Loading...</div>
 		</div>
+		
+		<footer id=page-footer>
+			<a href="https://github.com/odraencoded/html-tic-tac-toe">@github</a>
+		</footer>
 	</div>
 </div>
+
 <script src="tic-tac-toe.js"></script>
