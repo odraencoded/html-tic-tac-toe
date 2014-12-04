@@ -1,0 +1,22 @@
+#top-bar, #bottom-bar {
+	margin: 15px 3px;
+}
+
+#stats, #turn-stat {
+	font-size: 14px;
+}
+
+#status {
+	font-size: 19px;
+	margin: 15px 0;
+}
+
+#board {
+	border-radius: 0;
+	border-right: none;
+	border-left: none;
+}
+
+.square {
+	border-radius: 5px;
+}
